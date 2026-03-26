@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Em Manutenção</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #0d0d0d;
+      --paper: #f5f0e8;
+      --accent: #c84b2f;
+      --accent2: #2f6fc8;
+      --muted: #8a8070;
+      --rule: #c8b89a;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'DM Mono', monospace;
+      overflow: hidden;
+    }
+
+    /* Grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0.6;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      grid-template-columns: 1fr;
+      padding: 0;
+      position: relative;
+    }
+
+    /* Top rule */
+    .top-bar {
+      border-bottom: 2px solid var(--ink);
+      padding: 14px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeDown 0.8s ease both;
+    }
+    .top-bar .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.04em;
+    }
+    .top-bar .date-tag {
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* Main content */
+    .center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+      position: relative;
+    }
+
+    .card {
+      max-width: 680px;
+      width: 100%;
+      position: relative;
+    }
+
+    /* Decorative corner marks */
+    .card::before, .card::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-color: var(--accent);
+      border-style: solid;
+    }
+    .card::before { top: -16px; left: -16px; border-width: 2px 0 0 2px; }
+    .card::after  { bottom: -16px; right: -16px; border-width: 0 2px 2px 0; }
+
+    .eyebrow {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+      animation: fadeUp 0.9s 0.2s ease both;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .eyebrow::after {
+      content: '';
+      flex: 1;
+      max-width: 80px;
+      height: 1px;
+      background: var(--accent);
+      opacity: 0.5;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin-bottom: 28px;
+      animation: fadeUp 0.9s 0.35s ease both;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--rule);
+      margin: 28px 0;
+      animation: scaleX 0.8s 0.5s ease both;
+      transform-origin: left;
+    }
+
+    p.body {
+      font-size: 0.82rem;
+      line-height: 1.85;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      max-width: 480px;
+      animation: fadeUp 0.9s 0.55s ease both;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      margin-top: 40px;
+      animation: fadeUp 0.9s 0.65s ease both;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .progress-track {
+      width: 100%;
+      height: 3px;
+      background: var(--rule);
+      position: relative;
+      overflow: visible;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--ink);
+      width: 0%;
+      animation: fillBar 2.5s 1s cubic-bezier(0.4,0,0.2,1) forwards;
+      position: relative;
+    }
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      right: -1px;
+      top: -3px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px var(--paper);
+    }
+
+    /* Countdown */
+    .countdown {
+      margin-top: 44px;
+      display: flex;
+      gap: 32px;
+      animation: fadeUp 0.9s 0.75s ease both;
+    }
+    .count-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .count-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      font-weight: 700;
+      min-width: 2.5ch;
+    }
+    .count-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .count-sep {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--rule);
+      align-self: flex-start;
+      padding-top: 2px;
+    }
+
+    /* Right decorative element */
+    .deco {
+      position: absolute;
+      right: -80px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      animation: fadeIn 1.2s 1.2s ease forwards;
+    }
+    .deco-line { width: 1px; height: 80px; background: var(--rule); }
+    .deco-circle {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      border: 1.5px solid var(--accent2);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    .deco-text {
+      writing-mode: vertical-rl;
+      font-size: 0.6rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* Bottom bar */
+    .bottom-bar {
+      border-top: 1px solid var(--rule);
+      padding: 14px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      animation: fadeUp 0.8s 0.9s ease both;
+    }
+    .bottom-bar a {
+      color: var(--accent2);
+      text-decoration: none;
+    }
+    .bottom-bar a:hover { text-decoration: underline; }
+
+    /* Floating grid lines */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        linear-gradient(var(--rule) 1px, transparent 1px),
+        linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.18;
+      mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 0%, transparent 100%);
+    }
+
+    /* Keyframes */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes scaleX {
+      from { transform: scaleX(0); opacity: 0; }
+      to   { transform: scaleX(1); opacity: 1; }
+    }
+    @keyframes fillBar {
+      to { width: 73%; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.4); }
+    }
+
+    /* Mobile */
+    @media (max-width: 640px) {
+      .top-bar, .bottom-bar { padding: 12px 24px; }
+      .center { padding: 32px 24px; }
+      .deco { display: none; }
+      .card::before, .card::after { display: none; }
+      .countdown { gap: 20px; }
+      .count-num { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="page">
+
+    <header class="top-bar">
+      <span class="logo">Seu Site</span>
+      <span class="date-tag" id="live-date"></span>
+    </header>
+
+    <main class="center">
+      <div class="card">
+
+        <div class="eyebrow">Aviso de sistema</div>
+
+        <h1>Em <em>manutenção</em><br>no momento.</h1>
+
+        <div class="divider"></div>
+
+        <p class="body">
+          Estamos trabalhando para melhorar sua experiência. O site voltará em breve com novidades.
+          Pedimos desculpas pelo transtorno temporário.
+        </p>
+
+        <div class="progress-wrap">
+          <div class="progress-label">
+            <span>Progresso</span>
+            <span id="pct">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="fill"></div>
+          </div>
+        </div>
+
+        <div class="countdown">
+          <div class="count-unit">
+            <span class="count-num" id="cd-h">00</span>
+            <span class="count-label">Horas</span>
+          </div>
+          <span class="count-sep">:</span>
+          <div class="count-unit">
+            <span class="count-num" id="cd-m">00</span>
+            <span class="count-label">Minutos</span>
+          </div>
+          <span class="count-sep">:</span>
+          <div class="count-unit">
+            <span class="count-num" id="cd-s">00</span>
+            <span class="count-label">Segundos</span>
+          </div>
+        </div>
+
+        <!-- decorative side element -->
+        <div class="deco" aria-hidden="true">
+          <div class="deco-line"></div>
+          <div class="deco-circle"></div>
+          <div class="deco-text">status online</div>
+          <div class="deco-line"></div>
+        </div>
+
+      </div>
+    </main>
+
+    <footer class="bottom-bar">
+      <span>© <span id="year"></span> Seu Site</span>
+      <span>Contato: <a href="mailto:contato@seusite.com">contato@seusite.com</a></span>
+    </footer>
+
+  </div>
+
+  <script>
+    // --- Config ---
+    // Defina aqui a data/hora de retorno previsto (ISO 8601)
+    const TARGET = new Date('2025-06-01T12:00:00');
+
+    // --- Live date ---
+    const liveDate = document.getElementById('live-date');
+    const yearEl = document.getElementById('year');
+    function updateDate() {
+      const now = new Date();
+      liveDate.textContent = now.toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+      yearEl.textContent = now.getFullYear();
+    }
+    updateDate();
+
+    // --- Countdown ---
+    const cdH = document.getElementById('cd-h');
+    const cdM = document.getElementById('cd-m');
+    const cdS = document.getElementById('cd-s');
+    function pad(n) { return String(n).padStart(2,'0'); }
+
+    function tick() {
+      const diff = TARGET - Date.now();
+      if (diff <= 0) {
+        cdH.textContent = '00'; cdM.textContent = '00'; cdS.textContent = '00';
+        return;
+      }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      cdH.textContent = pad(h > 99 ? 99 : h);
+      cdM.textContent = pad(m);
+      cdS.textContent = pad(s);
+    }
+    tick();
+    setInterval(tick, 1000);
+
+    // --- Progress bar percentage counter ---
+    const fill = document.getElementById('fill');
+    const pct  = document.getElementById('pct');
+    const target = 73;
+    let current = 0;
+    const duration = 2500, fps = 60;
+    const step = target / (duration / (1000/fps));
+    const timer = setInterval(() => {
+      current = Math.min(current + step, target);
+      pct.textContent = Math.round(current) + '%';
+      if (current >= target) clearInterval(timer);
+    }, 1000/fps);
+  </script>
+</body>
+</html>
